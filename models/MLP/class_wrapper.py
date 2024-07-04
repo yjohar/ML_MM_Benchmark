@@ -25,19 +25,19 @@ class Network(object):
     def __init__(self, dim_g, dim_s, linear=[500, 500, 500, 500, 500, 500], skip_connection=False, skip_head=0, dropout=0, model_name=None, 
                 ckpt_dir=os.path.join(os.path.abspath(''), 'models','MLP'),
                  inference_mode=False, saved_model=None):
-        linear[0] = dim_g
-        linear[-1] = dim_s
+        linear[0] = dim_g # Input Size
+        linear[-1] = dim_s # Output Size
         if inference_mode:                                      # If inference mode, use saved model
             self.ckpt_dir = os.path.join(ckpt_dir, saved_model)
             self.saved_model = saved_model
             print("This is inference mode, the ckpt is", self.ckpt_dir)
         else:                                                   # training mode, create a new ckpt folder
             if model_name is None:
-                self.ckpt_dir = os.path.join(ckpt_dir, time.strftime('%Y%m%d_%H%M%S', time.localtime()))
+                self.ckpt_dir = os.path.join(ckpt_dir, time.strftime('%Y%m%d_%H%M%S', time.localtime())) # Save it as systemtime
             else:
                 self.ckpt_dir = os.path.join(ckpt_dir, model_name)
         self.log = SummaryWriter(self.ckpt_dir)     # Create a summary writer for keeping the summary to the tensor board
-        self.best_validation_loss = float('inf')    # Set the BVL to large number
+        self.best_validation_loss = float('inf')    # Set the BVL to large number [These two are for the early stop of the training.]
         self.best_training_loss = float('inf')    # Set the BTL to large number
 
         # marking the flag object with these information
@@ -51,7 +51,7 @@ class Network(object):
         # flags.num_encoder_layer, flags.head_linear, flags.tail_linear, flags.sequence_length, 
         # flags.model_name = dim_g, dim_s, feature_channel_num, nhead_encoder, dim_fc_encoder,num_encoder_layer, 
         # head_linear, tail_linear, sequence_length, model_name
-        self.flags = flags
+        self.flags = flags # It looks like it reads a file to set the parameters in field_list
         
         self.model = self.create_model()
 
@@ -76,7 +76,7 @@ class Network(object):
         :return: the total loss
         """
         MSE_loss = nn.functional.mse_loss(logit, labels, reduction='mean')          # The MSE Loss
-        BDY_loss = 0
+        BDY_loss = 0 #Boundary Loss - to prevent the loss to go beyond a certain range
         if G is not None:         # This is using the boundary loss
             X_range, X_lower_bound, X_upper_bound = self.get_boundary_lower_bound_uper_bound()
             X_mean = (X_lower_bound + X_upper_bound) / 2        # Get the mean
