@@ -81,7 +81,7 @@ class Network(object):
             X_range, X_lower_bound, X_upper_bound = self.get_boundary_lower_bound_uper_bound()
             X_mean = (X_lower_bound + X_upper_bound) / 2        # Get the mean
             relu = torch.nn.ReLU()
-            BDY_loss_all = 1 * relu(torch.abs(G - self.build_tensor(X_mean)) - 0.5 * self.build_tensor(X_range))
+            BDY_loss_all = 1 * relu(torch.abs(G - self.build_tensor(X_mean)) - 0.5 * self.build_tensor(X_range)) # This is eq for boundary loss of Relu
         self.MSE_loss = MSE_loss
         self.Boundary_loss = BDY_loss
         return torch.add(MSE_loss, BDY_loss)
